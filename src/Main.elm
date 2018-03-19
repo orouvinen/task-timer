@@ -301,45 +301,6 @@ update msg model =
             model ! []
 
 
-taskTotalTime : Model -> Task -> Time -> Time
-taskTotalTime model task time =
-    let
-        fragmentDuration fragment =
-            case fragment.end of
-                Just endTime ->
-                    endTime - fragment.start
-
-                Nothing ->
-                    time - fragment.start
-    in
-        model.timeFragments
-            |> List.filter (\tf -> tf.taskId == task.id)
-            |> List.map fragmentDuration
-            |> List.sum
-
-
-getLatestTimeFragment : Model -> Task -> Maybe TimeFragment
-getLatestTimeFragment model task =
-    let
-        fragmentOrderNum =
-            (timeFragmentCount model task) - 1
-    in
-        getTimeFragment model task fragmentOrderNum
-
-
-getTimeFragment : Model -> Task -> Int -> Maybe TimeFragment
-getTimeFragment model task orderNum =
-    model.timeFragments
-        |> List.filter (\fragment -> fragment.taskId == task.id && fragment.orderNum == orderNum)
-        |> List.head
-
-
-timeFragmentCount : Model -> Task -> Int
-timeFragmentCount model task =
-    model.timeFragments
-        |> List.filter (\fragment -> fragment.taskId == task.id)
-        |> List.length
-
 
 view : Model -> Html Msg
 view model =
@@ -594,6 +555,47 @@ nounPlural noun count =
             ""
            else
             "s"
+
+
+taskTotalTime : Model -> Task -> Time -> Time
+taskTotalTime model task time =
+    let
+        fragmentDuration fragment =
+            case fragment.end of
+                Just endTime ->
+                    endTime - fragment.start
+
+                Nothing ->
+                    time - fragment.start
+    in
+        model.timeFragments
+            |> List.filter (\tf -> tf.taskId == task.id)
+            |> List.map fragmentDuration
+            |> List.sum
+
+
+getLatestTimeFragment : Model -> Task -> Maybe TimeFragment
+getLatestTimeFragment model task =
+    let
+        fragmentOrderNum =
+            (timeFragmentCount model task) - 1
+    in
+        getTimeFragment model task fragmentOrderNum
+
+
+getTimeFragment : Model -> Task -> Int -> Maybe TimeFragment
+getTimeFragment model task orderNum =
+    model.timeFragments
+        |> List.filter (\fragment -> fragment.taskId == task.id && fragment.orderNum == orderNum)
+        |> List.head
+
+
+timeFragmentCount : Model -> Task -> Int
+timeFragmentCount model task =
+    model.timeFragments
+        |> List.filter (\fragment -> fragment.taskId == task.id)
+        |> List.length
+
 
 
 append : a -> List a -> List a
