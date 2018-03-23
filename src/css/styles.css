@@ -1,0 +1,83 @@
+body {
+    margin: 0;
+}
+
+#main {
+    padding-top: 2em;
+    width: 75%;
+    margin: 0 auto;
+}
+
+button {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+/* Remove outline from bootstrap buttons */
+.btn:focus {
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.project-header {
+    display: inline;
+}
+
+.project-controls {
+    margin-bottom: 1em;
+    margin-top: 1em;
+    display: block;
+    clear: both;
+}
+
+.outer-controls {
+    margin-top: 1em;
+}
+
+.bottom-border {
+    border-bottom: 1px solid #ccc;
+}
+
+.task-list {
+    padding: 1em 1em 1em 2em;
+    border-radius: 2px;
+    margin: 2em 0 2em 0em;
+}
+.task-list-item {
+    border-bottom: 1px solid #ccc;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.task-time {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #aaa;
+}
+
+.task-time.running {
+    color: black;
+    animation-name: fade-out-in;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+
+.material-icons {
+    vertical-align: bottom !important;
+    font-size: 32px !important;
+}
+
+.material-icons.small-icon {
+    font-size: 24px !important;
+}
+
+@keyframes fade-out-in {
+    15% { color: #555 }
+    25% { color: #000 }
+    100% { color: #aaa }
+}
