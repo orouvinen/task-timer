@@ -46,6 +46,7 @@ type alias Task =
     , running : Bool
     , editing : Bool
     , elapsed : Time
+    , finished : Bool
     , projectId : ProjectId
     }
 
@@ -77,6 +78,7 @@ type Msg
     | CancelCreateProject
     | AddTask ProjectId
     | DeleteTask TaskId
+    | FinishTask Task
     | TaskNameInputStart ProjectId
     | TaskNameInputChange TaskId String
     | ToggleTaskEdit TaskId String
@@ -154,7 +156,7 @@ update msg model =
             { model
                 | tasks =
                     model.tasks
-                        |> append { id = model.nextTaskId, projectId = projectId, name = "", running = False, editing = True, elapsed = 0 }
+                        |> append { id = model.nextTaskId, projectId = projectId, name = "", running = False, finished = False, editing = True, elapsed = 0 }
                 , nextTaskId = model.nextTaskId + 1
             }
                 ! []
@@ -191,6 +193,19 @@ update msg model =
 
         DeleteTask id ->
             { model | tasks = List.filter (\t -> t.id /= id) model.tasks } ! []
+
+        FinishTask task ->
+            let
+                finishTask t =
+                    { t
+                        | finished =
+                            if t == task then
+                                True
+                            else
+                                t.finished
+                    }
+            in
+                { model | tasks = List.map finishTask model.tasks } ! []
 
         CancelCreateTask ->
             model ! []
@@ -301,7 +316,6 @@ update msg model =
             model ! []
 
 
-
 view : Model -> Html Msg
 view model =
     div [] <|
@@ -342,7 +356,9 @@ projectHeader : Model -> Project -> Html Msg
 projectHeader model project =
     let
         taskCount =
-            List.length <| projectTasks model project
+            projectTasks model project
+                |> activeTasks
+                |> List.length
     in
         span []
             [ span [ class "text-muted" ] [ text "Project" ]
@@ -351,7 +367,7 @@ projectHeader model project =
                     project.name
                         ++ " ("
                         ++ toString taskCount
-                        ++ nounPlural " task" taskCount
+                        ++ nounPlural " active task" taskCount
                         ++ ")"
                 ]
             ]
@@ -382,12 +398,18 @@ project model project =
                 []
 
 
+
+-- Render html of unfinished tasks
+
+
 taskList : Model -> List Task -> Html Msg
 taskList model tasks =
-    if List.length tasks == 0 then
+    if (List.length <| activeTasks tasks) == 0 then
         div [ class "task-list text-muted" ] [ text "No tasks" ]
     else
-        div [ class "task-list" ] <| List.map (task model) tasks
+        activeTasks tasks
+            |> List.map (task model)
+            |> div [ class "task-list" ]
 
 
 task : Model -> Task -> Html Msg
@@ -466,7 +488,9 @@ taskControls task =
             [ class "btn btn-outline-dark btn-sm", onClick <| SetTaskRunning task False ]
             [ icon Small "pause" ]
     , button
-        [ class "btn btn-success btn-sm" ]
+        [ class "btn btn-success btn-sm"
+        , onClick <| FinishTask task
+        ]
         [ icon Small "done" ]
     , button
         [ class "btn btn-danger btn-sm"
@@ -541,6 +565,11 @@ projectTasks model project =
         |> List.filter (\t -> t.projectId == project.id)
 
 
+activeTasks : List Task -> List Task
+activeTasks =
+    List.filter (not << .finished)
+
+
 getTask : Model -> TaskId -> Maybe Task
 getTask model taskId =
     model.tasks
@@ -595,7 +624,6 @@ timeFragmentCount model task =
     model.timeFragments
         |> List.filter (\fragment -> fragment.taskId == task.id)
         |> List.length
-
 
 
 append : a -> List a -> List a
